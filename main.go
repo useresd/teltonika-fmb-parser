@@ -59,7 +59,7 @@ func parseTimestamp(data []byte) time.Time {
 
 func parseOneByteIO(data []byte) []map[uint8]uint8 {
 
-	var oneByteIO []map[uint8]uint8
+	oneByteIO := []map[uint8]uint8{}
 
 	for i := 0; i < len(data); i += 2 {
 		oneByteIO = append(oneByteIO, map[uint8]uint8{data[i]: data[i+1]})
@@ -70,7 +70,7 @@ func parseOneByteIO(data []byte) []map[uint8]uint8 {
 
 func parseTwoByteIO(data []byte) []map[uint8]uint16 {
 
-	var twoByteIO []map[uint8]uint16
+	twoByteIO := []map[uint8]uint16{}
 
 	for i := 0; i < len(data); i += 3 {
 		twoByteIO = append(twoByteIO, map[uint8]uint16{data[i]: binary.BigEndian.Uint16(data[i+1 : i+3])})
@@ -81,7 +81,7 @@ func parseTwoByteIO(data []byte) []map[uint8]uint16 {
 
 func parseFourByteIO(data []byte) []map[uint8]uint32 {
 
-	var fourByteIO []map[uint8]uint32
+	fourByteIO := []map[uint8]uint32{}
 
 	for i := 0; i < len(data); i += 5 {
 		fourByteIO = append(fourByteIO, map[uint8]uint32{data[i]: binary.BigEndian.Uint32(data[i+1 : i+5])})
@@ -92,7 +92,7 @@ func parseFourByteIO(data []byte) []map[uint8]uint32 {
 
 func parseEightByteIO(data []byte) []map[uint8]uint64 {
 
-	var eightByteIO []map[uint8]uint64
+	eightByteIO := []map[uint8]uint64{}
 
 	for i := 0; i < len(data); i += 9 {
 		eightByteIO = append(eightByteIO, map[uint8]uint64{data[i]: binary.BigEndian.Uint64(data[i+1 : i+9])})
@@ -148,24 +148,28 @@ func Parse(body []byte) AVLDataArray {
 		noOfTotalIO := body[noOfTotalIOIndex]
 		IOElement.NoOfTotalIO = noOfTotalIO
 
-		// 1 Byte IO
+		// One Byte IO Number
 		noOfOneByteIOIndex := noOfTotalIOIndex + 1
 		noOfOneByteIO := body[noOfOneByteIOIndex]
+
+		// One Byte IO Data
 		oneByteIOStartIndex := noOfOneByteIOIndex + 1
 		oneByteIOEndIndex := oneByteIOStartIndex + int(noOfOneByteIO)*2
 		oneByteIO := body[oneByteIOStartIndex:oneByteIOEndIndex]
 		IOElement.OneByteIO = parseOneByteIO(oneByteIO)
 
-		// Two Byte IO
-		noOfTwoByteIOIndex := noOfOneByteIOIndex + 1 + int(noOfOneByteIO)*2
+		// Two Byte IO Number
+		noOfTwoByteIOIndex := oneByteIOEndIndex
 		noOfTwoByteIO := body[noOfTwoByteIOIndex]
+
+		// Two Byte IO Data
 		twoByteIOStartIndex := noOfTwoByteIOIndex + 1
 		twoByteIOEndIndex := twoByteIOStartIndex + int(noOfTwoByteIO)*3
 		twoByteIO := body[twoByteIOStartIndex:twoByteIOEndIndex]
 		IOElement.TwoByteIO = parseTwoByteIO(twoByteIO)
 
 		// Four Byte IO
-		noOfFourByteIOIndex := noOfTwoByteIOIndex + 1 + int(noOfTwoByteIO)*3
+		noOfFourByteIOIndex := twoByteIOEndIndex
 		noOfFourByteIO := body[noOfFourByteIOIndex]
 		fourByteIOStartIndex := noOfFourByteIOIndex + 1
 		fourByteIOEndIndex := fourByteIOStartIndex + int(noOfFourByteIO)*5
@@ -173,7 +177,7 @@ func Parse(body []byte) AVLDataArray {
 		IOElement.FourByteIO = parseFourByteIO(fourByteIO)
 
 		// Eight Byte IO
-		noOfEightByteIOIndex := noOfFourByteIOIndex + 1 + int(noOfFourByteIO)*5
+		noOfEightByteIOIndex := fourByteIOEndIndex
 		noOfEightByteIO := body[noOfEightByteIOIndex]
 		eightByteIOStartIndex := noOfEightByteIOIndex + 1
 		eightByteIOEndIndex := eightByteIOStartIndex + int(noOfEightByteIO)*9
